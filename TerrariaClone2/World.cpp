@@ -1,4 +1,5 @@
 #include "World.h"
+#include "PerlinNoise.h" 
 
 World::World(int width, int height, int tileSize)
     : worldWidth(width), worldHeight(height), tileSize(tileSize) {
@@ -24,18 +25,37 @@ void World::loadTextures() {
     float tileScale = 32.0f / 1024.0f; // = 0.03125f
     tileSprite.setScale(tileScale, tileScale);
 }
-
 void World::generateWorld() {
+    // Surface generation (keep your current surface code)
     for (int x = 0; x < worldWidth; x++) {
+        double noiseValue = generateTerrain(x, 6, 2, 0.8);
+        int surfaceHeight = static_cast<int>((noiseValue + 1.0) * 0.5 * (worldHeight * 0.4)) + (worldHeight * 0.3);
+        surfaceHeight = std::max(5, std::min(surfaceHeight, worldHeight - 10));
+
         for (int y = 0; y < worldHeight; y++) {
-            if (y < 8) {
+            if (y < surfaceHeight) {
                 tiles[x][y] = AIR;
             }
-            else if (y < 12) {
+            else if (y < surfaceHeight + 5) {
                 tiles[x][y] = DIRT;
             }
             else {
                 tiles[x][y] = STONE;
+            }
+        }
+    }
+
+    // FIXED cave generation - create 2D noise by combining x and y noise
+    for (int x = 5; x < worldWidth - 5; x++) {
+        for (int y = worldHeight / 2 + 3; y < worldHeight - 5; y++) {
+            // Generate separate noise for x and y, then combine
+            double xNoise = generateTerrain(x, 3, 0.6, 0.05);
+            double yNoise = generateTerrain(y, 3, 0.6, 0.05);
+            double caveNoise = (xNoise + yNoise) * 0.5; // Average them
+
+            // Create caves where noise is above threshold
+            if (caveNoise > 0.1 && tiles[x][y] != AIR) { // Lower threshold
+                tiles[x][y] = AIR;
             }
         }
     }
@@ -64,4 +84,38 @@ void World::draw(sf::RenderWindow& window, sf::Vector2f cameraOffset) {
             }
         }
     }
+}
+
+int World::getSurfaceHeight(int x) const {
+    if (x < 0 || x >= worldWidth) return worldHeight / 2;
+
+    for (int y = 0; y < worldHeight; y++) {
+        if (tiles[x][y] != AIR) {
+            return y * tileSize;
+        }
+    }
+    return worldHeight / 2 * tileSize;
+}
+
+bool World::isSolid(int tileX, int tileY) const {
+    if (tileX < 0 || tileX >= worldWidth || tileY < 0 || tileY >= worldHeight) {
+        return true;
+    }
+    return tiles[tileX][tileY] != AIR;
+}
+
+bool World::checkCollision(sf::Vector2f position, sf::Vector2f size) const {
+    int leftTile = static_cast<int>(position.x / tileSize);
+    int rightTile = static_cast<int>((position.x + size.x) / tileSize);
+    int topTile = static_cast<int>(position.y / tileSize);
+    int bottomTile = static_cast<int>((position.y + size.y) / tileSize);
+
+    for (int x = leftTile; x <= rightTile; x++) {
+        for (int y = topTile; y <= bottomTile; y++) {
+            if (isSolid(x, y)) {
+                return true;
+            }
+        }
+    }
+    return false;
 }

@@ -9,6 +9,11 @@ public:
     void draw(sf::RenderWindow& window, sf::Vector2f cameraOffset);
     int getWorldWidth() const { return worldWidth * tileSize; }
     int getWorldHeight() const { return worldHeight * tileSize; }
+    int getSurfaceHeight(int x) const;
+
+    // Collision detection methods
+    bool isSolid(int tileX, int tileY) const;
+    bool checkCollision(sf::Vector2f position, sf::Vector2f size) const;
 
     static const int AIR = 0;
     static const int DIRT = 1;

@@ -4,16 +4,23 @@
 #include "Camera.h"
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(800, 600), "Terraria Game");
+    // Create resizable window
+    sf::RenderWindow window(sf::VideoMode(800, 600), "Terraria Game", sf::Style::Default);
     window.setFramerateLimit(60);
 
-    // Create game objects
+    // Create game objects with fixed design resolution
+    const float DESIGN_WIDTH = 800.0f;
+    const float DESIGN_HEIGHT = 600.0f;
+
     World world(50, 30, 32); // Bigger world: 50x30 tiles, 32 pixels each
     Player player;
-    Camera camera(800, 600);
+    Camera camera(DESIGN_WIDTH, DESIGN_HEIGHT);
 
     // Set camera world bounds
     camera.setWorldBounds(world.getWorldWidth(), world.getWorldHeight());
+
+    // Handle initial window size
+    camera.handleResize(window.getSize());
 
     sf::Clock clock;
 
@@ -25,6 +32,10 @@ int main() {
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 window.close();
+            }
+            // Handle window resize
+            else if (event.type == sf::Event::Resized) {
+                camera.handleResize(sf::Vector2u(event.size.width, event.size.height));
             }
         }
 

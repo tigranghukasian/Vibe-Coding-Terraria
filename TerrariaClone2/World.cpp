@@ -25,6 +25,7 @@ void World::loadTextures() {
     float tileScale = 32.0f / 1024.0f; // = 0.03125f
     tileSprite.setScale(tileScale, tileScale);
 }
+
 void World::generateWorld() {
     // Surface generation (keep your current surface code)
     for (int x = 0; x < worldWidth; x++) {
@@ -62,11 +63,14 @@ void World::generateWorld() {
 }
 
 void World::draw(sf::RenderWindow& window, sf::Vector2f cameraOffset) {
+    // Get the current view size instead of hardcoded 800x600
+    sf::Vector2f viewSize = window.getView().getSize();
+
     // Only draw tiles that are visible on screen for better performance
     int startX = std::max(0, static_cast<int>(cameraOffset.x / tileSize));
-    int endX = std::min(worldWidth, static_cast<int>((cameraOffset.x + 800) / tileSize) + 1);
+    int endX = std::min(worldWidth, static_cast<int>((cameraOffset.x + viewSize.x) / tileSize) + 1);
     int startY = std::max(0, static_cast<int>(cameraOffset.y / tileSize));
-    int endY = std::min(worldHeight, static_cast<int>((cameraOffset.y + 600) / tileSize) + 1);
+    int endY = std::min(worldHeight, static_cast<int>((cameraOffset.y + viewSize.y) / tileSize) + 1);
 
     for (int x = startX; x < endX; x++) {
         for (int y = startY; y < endY; y++) {

@@ -23,9 +23,13 @@ public:
     // Convert world position to tile coordinates
     sf::Vector2i worldToTile(sf::Vector2f worldPos) const;
 
+    // Grass management
+    void updateGrassLayer();
+
     static const int AIR = 0;
     static const int DIRT = 1;
     static const int STONE = 2;
+    static const int GRASS = 3;  // New grass block type
 
 private:
     int worldWidth;
@@ -35,6 +39,7 @@ private:
 
     sf::Texture dirtTexture;
     sf::Texture stoneTexture;
+    sf::Texture grassTexture;  // New grass texture
     sf::Sprite tileSprite;
 
     void loadTextures();

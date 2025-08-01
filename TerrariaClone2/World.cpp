@@ -22,6 +22,21 @@ void World::loadTextures() {
         stoneTexture.loadFromImage(stoneImage);
     }
 
+    // Load grass texture - green on top, brown on bottom
+    if (!grassTexture.loadFromFile("assets/grass.png")) {
+        sf::Image grassImage;
+        grassImage.create(tileSize, tileSize, sf::Color(139, 69, 19)); // Brown base
+
+        // Add green top layer (top 1/4 of the block)
+        for (int x = 0; x < tileSize; x++) {
+            for (int y = 0; y < tileSize / 4; y++) {
+                grassImage.setPixel(x, y, sf::Color(34, 139, 34)); // Forest green
+            }
+        }
+
+        grassTexture.loadFromImage(grassImage);
+    }
+
     float tileScale = 32.0f / 64.0f; // = 0.03125f
     tileSprite.setScale(tileScale, tileScale);
 }
@@ -46,7 +61,7 @@ void World::generateWorld() {
         }
     }
 
-    // FIXED cave generation - create 2D noise by combining x and y noise
+    // Cave generation - create 2D noise by combining x and y noise
     for (int x = 5; x < worldWidth - 5; x++) {
         for (int y = worldHeight / 2 + 3; y < worldHeight - 5; y++) {
             // Generate separate noise for x and y, then combine
@@ -57,6 +72,24 @@ void World::generateWorld() {
             // Create caves where noise is above threshold
             if (caveNoise > 0.1 && tiles[x][y] != AIR) { // Lower threshold
                 tiles[x][y] = AIR;
+            }
+        }
+    }
+
+    // Generate grass layer on top of dirt blocks
+    updateGrassLayer();
+}
+
+void World::updateGrassLayer() {
+    // Convert all surface dirt blocks to grass
+    for (int x = 0; x < worldWidth; x++) {
+        for (int y = 0; y < worldHeight; y++) {
+            // If this is a dirt block with air above it, make it grass
+            if (tiles[x][y] == DIRT) {
+                bool hasAirAbove = (y == 0) || (y > 0 && tiles[x][y - 1] == AIR);
+                if (hasAirAbove) {
+                    tiles[x][y] = GRASS;
+                }
             }
         }
     }
@@ -82,6 +115,9 @@ void World::draw(sf::RenderWindow& window, sf::Vector2f cameraOffset) {
                 }
                 else if (tiles[x][y] == STONE) {
                     tileSprite.setTexture(stoneTexture);
+                }
+                else if (tiles[x][y] == GRASS) {
+                    tileSprite.setTexture(grassTexture);
                 }
 
                 window.draw(tileSprite);
@@ -132,6 +168,14 @@ int World::breakBlock(int tileX, int tileY) {
     int brokenBlock = tiles[tileX][tileY];
     if (brokenBlock != AIR) {
         tiles[tileX][tileY] = AIR;
+
+        // Update grass layer after breaking a block
+        updateGrassLayer();
+
+        // If we broke a grass block, return dirt instead
+        if (brokenBlock == GRASS) {
+            return DIRT;
+        }
     }
     return brokenBlock;
 }
@@ -143,6 +187,9 @@ bool World::placeBlock(int tileX, int tileY, int blockType) {
 
     if (tiles[tileX][tileY] == AIR && blockType != AIR) {
         tiles[tileX][tileY] = blockType;
+
+        // Update grass layer after placing a block
+        updateGrassLayer();
         return true;
     }
     return false;

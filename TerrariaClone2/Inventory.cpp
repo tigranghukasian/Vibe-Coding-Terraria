@@ -102,6 +102,7 @@ sf::Color Inventory::getItemColor(int itemType) const {
     switch (itemType) {
     case World::DIRT: return sf::Color(139, 69, 19);   // Brown
     case World::STONE: return sf::Color(128, 128, 128); // Gray
+    case World::GRASS: return sf::Color(34, 139, 34);   // Forest green
     default: return sf::Color::White;
     }
 }

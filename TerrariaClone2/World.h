@@ -18,6 +18,7 @@ public:
     // Block interaction methods
     int breakBlock(int tileX, int tileY);
     bool placeBlock(int tileX, int tileY, int blockType);
+    bool placeBlock(int tileX, int tileY, int blockType, sf::Vector2f playerPosition, sf::Vector2f playerSize);
     int getTileAt(int tileX, int tileY) const;
 
     // Convert world position to tile coordinates

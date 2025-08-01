@@ -132,7 +132,8 @@ void Player::handleMouseInput(World& world, sf::RenderWindow& window) {
     if (rightClick && !rightPressed && targetTile.x != -1) {
         int selectedItem = inventory.getSelectedItem();
         if (selectedItem != World::AIR) {
-            if (world.placeBlock(targetTile.x, targetTile.y, selectedItem)) {
+            // Use the new placeBlock method that checks for player collision
+            if (world.placeBlock(targetTile.x, targetTile.y, selectedItem, position, getSize())) {
                 inventory.removeItem(selectedItem);
             }
         }

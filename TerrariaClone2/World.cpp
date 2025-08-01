@@ -189,6 +189,38 @@ bool World::placeBlock(int tileX, int tileY, int blockType) {
     return false;
 }
 
+bool World::placeBlock(int tileX, int tileY, int blockType, sf::Vector2f playerPosition, sf::Vector2f playerSize) {
+    if (tileX < 0 || tileX >= worldWidth || tileY < 0 || tileY >= worldHeight) {
+        return false;
+    }
+
+    if (tiles[tileX][tileY] != AIR || blockType == AIR) {
+        return false;
+    }
+
+    // Calculate the world position of the block we want to place
+    sf::Vector2f blockWorldPos(tileX * tileSize, tileY * tileSize);
+    sf::Vector2f blockSize(tileSize, tileSize);
+
+    // Calculate player's collision box (player position is centered, so adjust)
+    sf::Vector2f playerCollisionPos(playerPosition.x - playerSize.x / 2, playerPosition.y - playerSize.y / 2);
+
+    // Check if the block would overlap with the player
+    bool overlapsX = (playerCollisionPos.x < blockWorldPos.x + blockSize.x) &&
+        (playerCollisionPos.x + playerSize.x > blockWorldPos.x);
+    bool overlapsY = (playerCollisionPos.y < blockWorldPos.y + blockSize.y) &&
+        (playerCollisionPos.y + playerSize.y > blockWorldPos.y);
+
+    // If there's overlap, don't place the block
+    if (overlapsX && overlapsY) {
+        return false;
+    }
+
+    // Safe to place the block
+    tiles[tileX][tileY] = blockType;
+    return true;
+}
+
 int World::getTileAt(int tileX, int tileY) const {
     if (tileX < 0 || tileX >= worldWidth || tileY < 0 || tileY >= worldHeight) {
         return AIR;

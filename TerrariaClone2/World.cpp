@@ -22,14 +22,14 @@ void World::loadTextures() {
         stoneTexture.loadFromImage(stoneImage);
     }
 
-    float tileScale = 32.0f / 1024.0f; // = 0.03125f
+    float tileScale = 32.0f / 64.0f; // = 0.03125f
     tileSprite.setScale(tileScale, tileScale);
 }
 
 void World::generateWorld() {
     // Surface generation (keep your current surface code)
     for (int x = 0; x < worldWidth; x++) {
-        double noiseValue = generateTerrain(x, 6, 2, 0.8);
+        double noiseValue = generateTerrain(x, 4, 0.5, 0.1);
         int surfaceHeight = static_cast<int>((noiseValue + 1.0) * 0.5 * (worldHeight * 0.4)) + (worldHeight * 0.3);
         surfaceHeight = std::max(5, std::min(surfaceHeight, worldHeight - 10));
 

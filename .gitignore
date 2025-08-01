@@ -1,0 +1,24 @@
+# Build outputs
+Debug/
+Release/
+x64/
+x86/
+
+# Visual Studio files
+.vs/
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.sln
+
+# Compiled files
+*.exe
+*.obj
+*.pdb
+*.ilk
+*.log
+
+# Keep source code and assets
+!*.cpp
+!*.h
+!assets/

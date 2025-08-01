@@ -15,6 +15,14 @@ public:
     bool isSolid(int tileX, int tileY) const;
     bool checkCollision(sf::Vector2f position, sf::Vector2f size) const;
 
+    // Block interaction methods
+    int breakBlock(int tileX, int tileY);
+    bool placeBlock(int tileX, int tileY, int blockType);
+    int getTileAt(int tileX, int tileY) const;
+
+    // Convert world position to tile coordinates
+    sf::Vector2i worldToTile(sf::Vector2f worldPos) const;
+
     static const int AIR = 0;
     static const int DIRT = 1;
     static const int STONE = 2;

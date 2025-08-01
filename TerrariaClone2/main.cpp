@@ -40,7 +40,7 @@ int main() {
         }
 
         // Update game objects
-        player.update(deltaTime, world); // Pass world to player for collision
+        player.update(deltaTime, world, window); // Pass window for mouse input
         camera.followPlayer(player.getPosition());
 
         // Set camera view

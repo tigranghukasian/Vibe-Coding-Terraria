@@ -1,7 +1,7 @@
 #include "Player.h"
 #include "World.h"
 
-Player::Player() : position(400, 200), velocity(0, 0), speed(200.0f), onGround(false) {
+Player::Player() : position(400, 200), velocity(0, 0), speed(200.0f), onGround(false), interactionRange(96.0f) {
     // Try to load player texture, fall back to colored rectangle if fails
     if (!texture.loadFromFile("assets/player.png")) {
         // Create a simple colored texture if image doesn't exist
@@ -13,15 +13,25 @@ Player::Player() : position(400, 200), velocity(0, 0), speed(200.0f), onGround(f
     sprite.setTexture(texture);
     sprite.setOrigin(12.0f, 20.0f);
     sprite.setPosition(position);
+
+    // Set up target highlight
+    targetHighlight.setSize(sf::Vector2f(32, 32));
+    targetHighlight.setFillColor(sf::Color::Transparent);
+    targetHighlight.setOutlineThickness(2);
+    targetHighlight.setOutlineColor(sf::Color(255, 255, 255, 128));
+
+    targetTile = sf::Vector2i(-1, -1);
 }
 
-void Player::update(float deltaTime, const World& world) {
+void Player::update(float deltaTime, World& world, sf::RenderWindow& window) {
     // Apply gravity
     const float GRAVITY = 800.0f; // Pixels per second squared
     velocity.y += GRAVITY * deltaTime;
 
     // Handle input
     handleInput(deltaTime, world);
+    handleMouseInput(world, window);
+    updateTargetTile(world, window);
 
     // Apply physics movement
     applyPhysics(deltaTime, world);
@@ -29,8 +39,11 @@ void Player::update(float deltaTime, const World& world) {
     sprite.setPosition(position);
 }
 
-void Player::handleInput(float deltaTime, const World& world) {
+void Player::handleInput(float deltaTime, World& world) {
     const float JUMP_SPEED = 350.0f;
+
+    // Handle inventory input
+    inventory.handleInput();
 
     // Horizontal movement
     velocity.x = 0; // Reset horizontal velocity
@@ -53,7 +66,59 @@ void Player::handleInput(float deltaTime, const World& world) {
     }
 }
 
-void Player::applyPhysics(float deltaTime, const World& world) {
+void Player::handleMouseInput(World& world, sf::RenderWindow& window) {
+    static bool leftPressed = false;
+    static bool rightPressed = false;
+
+    bool leftClick = sf::Mouse::isButtonPressed(sf::Mouse::Left);
+    bool rightClick = sf::Mouse::isButtonPressed(sf::Mouse::Right);
+
+    // Handle left click (break blocks) - only on press, not hold
+    if (leftClick && !leftPressed && targetTile.x != -1) {
+        int brokenBlock = world.breakBlock(targetTile.x, targetTile.y);
+        if (brokenBlock != World::AIR) {
+            inventory.addItem(brokenBlock);
+        }
+    }
+
+    // Handle right click (place blocks) - only on press, not hold
+    if (rightClick && !rightPressed && targetTile.x != -1) {
+        int selectedItem = inventory.getSelectedItem();
+        if (selectedItem != World::AIR) {
+            if (world.placeBlock(targetTile.x, targetTile.y, selectedItem)) {
+                inventory.removeItem(selectedItem);
+            }
+        }
+    }
+
+    leftPressed = leftClick;
+    rightPressed = rightClick;
+}
+
+void Player::updateTargetTile(World& world, sf::RenderWindow& window) {
+    sf::Vector2f mouseWorld = getMouseWorldPosition(window);
+    sf::Vector2i mouseTile = world.worldToTile(mouseWorld);
+
+    // Check if mouse is within interaction range
+    sf::Vector2f tileCenter(mouseTile.x * 32 + 16, mouseTile.y * 32 + 16);
+    sf::Vector2f playerCenter = position;
+    float distance = sqrt(pow(tileCenter.x - playerCenter.x, 2) + pow(tileCenter.y - playerCenter.y, 2));
+
+    if (distance <= interactionRange) {
+        targetTile = mouseTile;
+        targetHighlight.setPosition(mouseTile.x * 32, mouseTile.y * 32);
+    }
+    else {
+        targetTile = sf::Vector2i(-1, -1);
+    }
+}
+
+sf::Vector2f Player::getMouseWorldPosition(sf::RenderWindow& window) const {
+    sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
+    return window.mapPixelToCoords(mousePixel);
+}
+
+void Player::applyPhysics(float deltaTime, World& world) {
     // Test horizontal movement
     sf::Vector2f newPosition = position;
     newPosition.x += velocity.x * deltaTime;
@@ -85,6 +150,14 @@ void Player::applyPhysics(float deltaTime, const World& world) {
 
 void Player::draw(sf::RenderWindow& window) {
     window.draw(sprite);
+
+    // Draw target highlight if valid
+    if (targetTile.x != -1) {
+        window.draw(targetHighlight);
+    }
+
+    // Draw inventory
+    inventory.draw(window);
 }
 
 sf::Vector2f Player::getPosition() const {

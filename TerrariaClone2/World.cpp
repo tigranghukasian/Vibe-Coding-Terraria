@@ -123,3 +123,41 @@ bool World::checkCollision(sf::Vector2f position, sf::Vector2f size) const {
     }
     return false;
 }
+
+int World::breakBlock(int tileX, int tileY) {
+    if (tileX < 0 || tileX >= worldWidth || tileY < 0 || tileY >= worldHeight) {
+        return AIR;
+    }
+
+    int brokenBlock = tiles[tileX][tileY];
+    if (brokenBlock != AIR) {
+        tiles[tileX][tileY] = AIR;
+    }
+    return brokenBlock;
+}
+
+bool World::placeBlock(int tileX, int tileY, int blockType) {
+    if (tileX < 0 || tileX >= worldWidth || tileY < 0 || tileY >= worldHeight) {
+        return false;
+    }
+
+    if (tiles[tileX][tileY] == AIR && blockType != AIR) {
+        tiles[tileX][tileY] = blockType;
+        return true;
+    }
+    return false;
+}
+
+int World::getTileAt(int tileX, int tileY) const {
+    if (tileX < 0 || tileX >= worldWidth || tileY < 0 || tileY >= worldHeight) {
+        return AIR;
+    }
+    return tiles[tileX][tileY];
+}
+
+sf::Vector2i World::worldToTile(sf::Vector2f worldPos) const {
+    return sf::Vector2i(
+        static_cast<int>(worldPos.x / tileSize),
+        static_cast<int>(worldPos.y / tileSize)
+    );
+}

@@ -19,6 +19,8 @@ Inventory::Inventory() : selectedSlot(0), maxSlots(9) {
     countText.setFont(font);
     countText.setCharacterSize(24);
     countText.setFillColor(sf::Color::White);
+    countText.setOutlineColor(sf::Color::Black);
+    countText.setOutlineThickness(2);
     countText.setStyle(sf::Text::Bold); // Make it bold for better visibility
 }
 

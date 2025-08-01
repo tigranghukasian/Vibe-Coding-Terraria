@@ -11,7 +11,6 @@ Player::Player() : position(400, 200), speed(200.0f) {
     }
 
     sprite.setTexture(texture);
-    sprite.setScale(24.0f / 1024.0f, 40.0f / 1024.0f); // Scale to 24x40 size
     sprite.setPosition(position);
 }
 
@@ -35,6 +34,8 @@ void Player::handleInput(float deltaTime, const World& world) {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
         movement.y = speed;
     }
+
+    //position += movement * deltaTime;
 
     // Test horizontal movement
     sf::Vector2f newPosition = position;

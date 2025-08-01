@@ -23,6 +23,53 @@ Player::Player() : position(400, 200), velocity(0, 0), speed(200.0f), onGround(f
     targetTile = sf::Vector2i(-1, -1);
 }
 
+void Player::spawnOnSurface(World& world) {
+    // Find a good spawn location near the center of the world
+    int worldCenterX = world.getWorldWidth() / 2;
+
+    // Find the surface height at the center of the world
+    int surfaceY = world.getSurfaceHeight(worldCenterX / 32) / 32; // Convert to tile coordinates
+
+    // Look for a suitable spawn location (flat area with at least 2 blocks of air above)
+    int bestSpawnX = worldCenterX;
+    int bestSpawnY = surfaceY;
+
+    // Search in a range around the center for a flatter area
+    for (int searchX = worldCenterX - 160; searchX <= worldCenterX + 160; searchX += 32) {
+        if (searchX < 32 || searchX >= world.getWorldWidth() - 32) continue;
+
+        int tileX = searchX / 32;
+        int currentSurfaceY = world.getSurfaceHeight(searchX) / 32;
+
+        // Check if this location has enough air above it (at least 3 blocks high)
+        bool hasEnoughSpace = true;
+        for (int checkY = currentSurfaceY - 3; checkY < currentSurfaceY; checkY++) {
+            if (world.getTileAt(tileX, checkY) != World::AIR) {
+                hasEnoughSpace = false;
+                break;
+            }
+        }
+
+        // Prefer locations that are closer to the original center and have good clearance
+        if (hasEnoughSpace && abs(currentSurfaceY - surfaceY) <= 2) {
+            bestSpawnX = searchX;
+            bestSpawnY = currentSurfaceY;
+            break;
+        }
+    }
+
+    // Set player position on the surface with some clearance
+    position.x = static_cast<float>(bestSpawnX);
+    position.y = static_cast<float>((bestSpawnY - 2) * 32); // Spawn 2 blocks above surface
+
+    // Reset velocity and set on ground
+    velocity = sf::Vector2f(0, 0);
+    onGround = false; // Let physics handle ground detection
+
+    // Update sprite position
+    sprite.setPosition(position);
+}
+
 void Player::update(float deltaTime, World& world, sf::RenderWindow& window) {
     // Apply gravity
     const float GRAVITY = 800.0f; // Pixels per second squared

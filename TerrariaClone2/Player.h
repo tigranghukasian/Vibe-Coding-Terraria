@@ -10,6 +10,7 @@ public:
     sf::Vector2f getPosition() const;
     sf::Vector2f getSize() const { return sf::Vector2f(24, 40); }
     void setPosition(float x, float y);
+    void spawnOnSurface(class World& world); // New method to spawn on surface
     Inventory& getInventory() { return inventory; }
 
 private:

@@ -13,10 +13,13 @@ int main() {
     const float DESIGN_WIDTH = 800.0f;
     const float DESIGN_HEIGHT = 600.0f;
 
-    World world(150, 100, 32); // Bigger world: 50x30 tiles, 32 pixels each
+    World world(150, 100, 32); // Bigger world: 150x100 tiles, 32 pixels each
     Player player;
     Camera camera(DESIGN_WIDTH, DESIGN_HEIGHT);
     Background background(static_cast<int>(DESIGN_WIDTH), static_cast<int>(DESIGN_HEIGHT)); // Add background
+
+    // IMPORTANT: Spawn player on surface after world generation
+    player.spawnOnSurface(world);
 
     // Set manual offsets for each layer (example values - adjust as needed)
     background.setMountainOffset(0, 350);   // Move mountains 50 pixels down

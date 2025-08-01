@@ -169,9 +169,6 @@ int World::breakBlock(int tileX, int tileY) {
     if (brokenBlock != AIR) {
         tiles[tileX][tileY] = AIR;
 
-        // Update grass layer after breaking a block
-        updateGrassLayer();
-
         // If we broke a grass block, return dirt instead
         if (brokenBlock == GRASS) {
             return DIRT;
@@ -187,9 +184,6 @@ bool World::placeBlock(int tileX, int tileY, int blockType) {
 
     if (tiles[tileX][tileY] == AIR && blockType != AIR) {
         tiles[tileX][tileY] = blockType;
-
-        // Update grass layer after placing a block
-        updateGrassLayer();
         return true;
     }
     return false;
